@@ -1,41 +1,49 @@
 <script lang="ts">
-	import type { CartProduct } from '$lib/types';
 	import CartItem from './cart-item.svelte';
 	import ShoppingCart from 'phosphor-svelte/lib/ShoppingCart';
 	import X from 'phosphor-svelte/lib/X';
+	import type { CartProduct, Product } from '$lib/types';
 
 	let { data } = $props();
-
 	let cartOpen = $state(false);
 	let cartProducts = $state<CartProduct[]>([]);
 
 	const cartStats = $derived.by(() => {
-		let quantity = 0;
-		let total = 0;
+		let totalQuantity = 0;
+		let totalPrice = 0;
+
 		for (const product of cartProducts) {
-			quantity += product.quantity;
-			total += product.product.price * product.quantity;
+			totalQuantity += product.quantity;
+			totalPrice += product.product.price * product.quantity;
 		}
 		return {
-			quantity,
-			total
+			totalQuantity,
+			totalPrice
 		};
 	});
 
-	const qualifiesForFreeShipping = $derived(cartStats.total >= 50);
-
-	let freeShippingAlertCount = 0;
+	const qualifiesForFreeShipping = $derived(cartStats.totalPrice >= 50);
 
 	$effect(() => {
-		if (freeShippingAlertCount > 0) return;
-		if (qualifiesForFreeShipping) {
-			alert('You have qualified for free shipping!');
-			freeShippingAlertCount++;
-		}
+		if (qualifiesForFreeShipping) alert('Woohoo! You are qualifed for free shipping!');
 	});
 
+	function addToCart(addProduct: Product) {
+		const cartProduct = cartProducts.find(
+			(cartProduct) => cartProduct.product.id === addProduct.id
+		);
+		if (cartProduct) {
+			cartProduct.quantity++;
+		} else {
+			cartProducts.push({
+				id: crypto.randomUUID(),
+				product: addProduct,
+				quantity: 1
+			});
+		}
+	}
 	function removeFromCart(id: string) {
-		cartProducts = cartProducts.filter((product) => product.id !== id);
+		cartProducts = cartProducts.filter((product) => product.id != id);
 	}
 </script>
 
@@ -47,7 +55,7 @@
 			class="flex items-center rounded-full bg-sky-600 px-4 py-2 text-white hover:bg-sky-700"
 		>
 			<ShoppingCart class="mr-2 size-5" />
-			<span>Cart ({cartStats.quantity})</span>
+			<span>Cart （{cartStats.totalQuantity}）</span>
 		</button>
 		{#if cartOpen}
 			<div class="absolute right-0 top-8 z-10 mt-2 w-80 rounded-lg bg-white shadow-xl">
@@ -64,7 +72,7 @@
 						<CartItem bind:cartProduct={cartProducts[i]} removeItem={removeFromCart} />
 					{/each}
 					<div class="mt-4 border-gray-200 pt-4">
-						<p class="text-lg font-semibold">Total: ${cartStats.total.toFixed(2)}</p>
+						<p class="text-lg font-semibold">Total: {cartStats.totalPrice.toFixed(2)}</p>
 					</div>
 				</div>
 			</div>
@@ -84,13 +92,7 @@
 					<p class="text-xl font-bold">${product.price}</p>
 					<button
 						class="rounded-full bg-sky-600 px-4 py-2 text-white transition-colors duration-300 hover:bg-sky-700"
-						onclick={() => {
-							cartProducts.push({
-								id: crypto.randomUUID(),
-								quantity: 1,
-								product: product
-							});
-						}}
+						onclick={() => addToCart(product)}
 					>
 						Add to cart
 					</button>

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { CartProduct } from '$lib/types';
 	import Minus from 'phosphor-svelte/lib/Minus';
 	import Plus from 'phosphor-svelte/lib/Plus';
 	import Trash from 'phosphor-svelte/lib/Trash';
+	import type { CartProduct } from '$lib/types';
 
 	type Props = {
 		cartProduct: CartProduct;
@@ -21,38 +21,25 @@
 		/>
 		<div>
 			<p class="font-medium">{cartProduct.product.title}</p>
-			<p class="text-sm">${cartProduct.product.price} each</p>
+			<p class="text-sm">{cartProduct.product.price}</p>
 		</div>
 	</div>
 	<div class="flex items-center">
-		<button
-			onclick={() => {
-				if (cartProduct.quantity === 1) {
-					removeItem(cartProduct.id);
-				} else {
-					cartProduct.quantity--;
-				}
-			}}
-			class="rounded p-1 hover:bg-gray-200"
-			aria-label="Subtract 1 from quantity"
-		>
-			<Minus class="size-4" />
+		<button class="rounded p-1 hover:bg-gray-200" aria-label="Subtract 1 from quantity">
+			<Minus
+				class="size-4"
+				onclick={() => {
+					if (cartProduct.quantity > 1) cartProduct.quantity--;
+					else removeItem(cartProduct.id);
+				}}
+			/>
 		</button>
-		<span class="mx-2">
-			{cartProduct.quantity}
-		</span>
-		<button
-			class="rounded p-1 hover:bg-gray-200"
-			aria-label="Add 1 to quantity"
-			onclick={() => cartProduct.quantity++}
-		>
-			<Plus class="size-4" />
+		<span class="mx-2">{cartProduct.quantity}</span>
+		<button class="rounded p-1 hover:bg-gray-200" aria-label="Add 1 to quantity">
+			<Plus class="size-4" onclick={() => cartProduct.quantity++} />
 		</button>
-		<button
-			onclick={() => removeItem(cartProduct.id)}
-			class="ml-4 rounded p-1 text-red-500 hover:bg-red-100"
-		>
-			<Trash class="size-4" />
+		<button class="ml-4 rounded p-1 text-red-500 hover:bg-red-100">
+			<Trash class="size-4" onclick={() => removeItem(cartProduct.id)} />
 		</button>
 	</div>
 </div>
