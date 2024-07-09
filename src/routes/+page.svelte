@@ -9,7 +9,7 @@
 	let cartProducts = $state<CartProduct[]>([]);
 
 	const cartStats = $derived.by(() => {
-		let totalQuantity = 0;
+		let totalQuantity = 0;　
 		let totalPrice = 0;
 
 		for (const product of cartProducts) {
@@ -101,3 +101,4 @@
 		</div>
 	{/each}
 </div>
+
